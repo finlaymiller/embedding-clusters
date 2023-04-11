@@ -53,9 +53,9 @@ jobs:
         echo "is_public=$IS_PUBLIC"
         echo "is_public=$IS_PUBLIC" >> $GITHUB_ENV
 
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      if: github.ref == env.default_branch_ref && env.is_public == 1
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: "docs/_build/html/"
+    # - name: Deploy to GitHub Pages
+    #   uses: peaceiris/actions-gh-pages@v3
+    #   if: github.ref == env.default_branch_ref && env.is_public == 1
+    #   with:
+    #     github_token: ${{ secrets.GITHUB_TOKEN }}
+    #     publish_dir: "docs/_build/html/"
