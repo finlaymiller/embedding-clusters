@@ -8,7 +8,6 @@ import matplotlib as mpl
 import matplotlib.cm as cm
 from GURA import fusion_cat_xwc
 from scipy import signal as sps
-from google.colab import output
 from sklearn.manifold import TSNE
 from scipy.io import wavfile as wav
 from matplotlib import pyplot as plt
