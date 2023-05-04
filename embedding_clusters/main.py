@@ -18,9 +18,11 @@ from sklearn.decomposition import PCA
 def get_args(raw_args=None):
     parser = argparse.ArgumentParser(description="Clustering by embedding using GURA")
 
+    parser.add_argument("-s", "--save", action="store_true", help="Save embeddings to output folder")
+    parser.add_argument("-d", "--debug", action="store_true", help="Use debug settings, maximum verbosity")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable more prints")
     parser.add_argument("-i", "--input", action="store", default="data", help="Path to audio library/libraries")
     parser.add_argument("-o", "--output", action="store", default="embeddings", help="Path to write embeddings to")
-    parser.add_argument("-s", "--save", action="store_true")
 
     args = parser.parse_args(raw_args)
     print(f"input parameters {vars(args)}")
@@ -31,6 +33,10 @@ def main(raw_args=None):
 
   # process args
   args = get_args(raw_args)
+  if args.debug:
+    args.input = "/media/nova/Datasets/DCASE2016/eval/audio"
+    args.verbose = True
+    args.save = False
   loader = DataLoader(args)
 
 
@@ -48,7 +54,8 @@ def main(raw_args=None):
     filename = os.path.basename(infile)
     sr, d = wav.read(infile)
 
-    print(f"Loaded file {filename} with sample rate {sr} and shape {d.shape}")
+    if args.verbose:
+      print(f"Loaded file {filename} with sample rate {sr} and shape {d.shape}")
 
     # stereo to mono
     if d.shape[-1] == 2:
@@ -71,7 +78,9 @@ def main(raw_args=None):
     if args.save:
       torch.save(embedding, f"{newfolder}/{filename}.pt")
 
-  print(all_embeddings)
+  if args.verbose:
+    print("Created embeddings:")
+    print(all_embeddings)
 
   return
 

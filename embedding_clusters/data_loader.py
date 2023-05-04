@@ -2,6 +2,7 @@ import os
 
 class DataLoader():
     def __init__(self, args):
+        self.verbose = args.verbose
         self.input = args.input
         self.output = args.output
         self.files = []
@@ -12,7 +13,8 @@ class DataLoader():
         if not os.path.exists(self.output):
             os.makedirs(self.output)
 
-        print(f"Dataloader instantiated.\nInput folder is {self.input}\nOutput folder is {self.output}")
+        if self.verbose:
+            print(f"Dataloader instantiated.\nInput folder is {self.input}\nOutput folder is {self.output}")
 
     def collect(self, count=390):
         while len(self.files) < count:
@@ -21,7 +23,10 @@ class DataLoader():
                 filename = os.fsdecode(file)
                 if filename.endswith(".wav"):
                     self.files.append(os.path.join(self.input, filename))
-                    print(f"{i:03}/{count} {filename} added")
+
+                    if self.verbose:
+                        print(f"{i:03}/{count} {filename} added\t{len(self.files)}")
+
                     i += 1
 
     def load_random(self, count=100):
