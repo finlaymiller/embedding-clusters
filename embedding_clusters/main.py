@@ -59,8 +59,7 @@ def main(raw_args=None):
     filename = os.path.basename(infile)
     embedding_path = os.path.join(args.regen, f"{filename.split('.')[0]}.pt")
 
-    if args.regen:
-      if os.path.exists(embedding_path):
+    if args.regen and os.path.exists(embedding_path):
         if args.verbose:
           print(f"Found existing embedding for {filename}")
         
