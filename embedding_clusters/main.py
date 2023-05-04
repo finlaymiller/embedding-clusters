@@ -65,7 +65,6 @@ def main(raw_args=None):
         
         embedding = torch.load(embedding_path)
     else:
-
       sr, d = wav.read(infile)
 
       if args.verbose:
@@ -92,10 +91,12 @@ def main(raw_args=None):
 
     # new_embeddings.append({'filename': filename, 'embedding': embedding})
     # all_embeddings[dirname] = new_embeddings
-    all_embeddings["dcase"].append({'filename': filename, 'embedding': embedding})
+    all_embeddings["dcase"].append({filename, embedding})
+
+    i += 1
 
   if args.verbose:
-    print("Finished creating embeddings")
+    print("Finished creating embeddings", all_embeddings)
 
   # get all embeddings as flat list
   z = np.asarray([np.asarray(item) for sublist in list(all_embeddings.values()) for item in sublist]).squeeze()

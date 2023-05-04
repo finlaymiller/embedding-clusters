@@ -24,7 +24,7 @@ class DataLoader():
                 self.files.append(os.path.join(self.input, filename))
 
                 if self.verbose:
-                    print(f"{len(self.files):03}/{count:03} {filename}\tadded")
+                    print(f"{len(self.files):03}/{count:03} {filename} added")
 
     def load_random(self, count=100):
         print(f"randomly sampling {count} files")
