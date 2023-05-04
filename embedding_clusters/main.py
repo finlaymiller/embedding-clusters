@@ -24,7 +24,7 @@ def get_args(raw_args=None):
     parser.add_argument("-i", "--input", action="store", default="data", help="Path to audio library/libraries")
     parser.add_argument("-o", "--output", action="store", default="output", help="Path to write outputs to")
     parser.add_argument("-r", "--regen", action="store", default="output", help="Path to check for existing embeddings")
-    parser.add_argument("-n", "--num_samples", action="store", default="100", help="Number of samples to process")
+    parser.add_argument("-n", "--num_samples", action="store", default=100, help="Number of samples to process")
 
     args = parser.parse_args(raw_args)
     print(f"input parameters {vars(args)}")
