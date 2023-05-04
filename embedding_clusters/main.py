@@ -35,14 +35,14 @@ def main(raw_args=None):
   # process args
   args = get_args(raw_args)
   if args.debug:
-    args.input = "/media/nova/Datasets/DCASE2016/eval/audio"
+    args.input = "/media/nova/Datasets/DCASE2016/dev/audio"
     args.ouput = "test"
     args.verbose = True
     args.save = False
   loader = DataLoader(args)
 
   # load data and model
-  loader.collect(4)
+  loader.collect(100)
   model = fusion_cat_xwc.load_model()
 
   # save embeddings too
