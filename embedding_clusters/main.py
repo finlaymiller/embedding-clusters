@@ -57,13 +57,14 @@ def main(raw_args=None):
   for infile in loader.files:
     embedding = {}
     filename = os.path.basename(infile)
+    embedding_path = os.path.join(args.regen, f"{filename.split('.')[0]}.pt")
 
     if args.regen:
-      if os.path.exists(f"{args.output}/{filename}.pt"):
+      if os.path.exists(embedding_path):
         if args.verbose:
           print(f"Found existing embedding for {filename}")
         
-        embedding = torch.load(f"{args.output}/{filename}.pt")
+        embedding = torch.load(embedding_path)
     else:
 
       sr, d = wav.read(infile)
@@ -88,7 +89,7 @@ def main(raw_args=None):
       embedding = fusion_cat_xwc.get_scene_embeddings(torch.as_tensor(d, dtype=torch.float32)[None, :], model)
 
       if args.save:
-        torch.save(embedding, f"{args.output}/{filename.split('.')[0]}.pt")
+        torch.save(embedding, embedding_path)
 
     # new_embeddings.append({'filename': filename, 'embedding': embedding})
     # all_embeddings[dirname] = new_embeddings
