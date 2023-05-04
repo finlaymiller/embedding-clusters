@@ -26,57 +26,48 @@ def get_args(raw_args=None):
     return args
 
 def main(raw_args=None):
+  t = datetime.datetime.now()
+
   # process args
   args = get_args(raw_args)
   loader = DataLoader(args)
 
+
+  # load data and model
   loader.load()
+  model = fusion_cat_xwc.load_model()
 
-  # load model
-  # model = fusion_cat_xwc.load_model()
-
-  # os.chdir(args.input)
-  # all_embeddings = {}
-
-  # # save embeddings too
-  # t = datetime.datetime.now()
-  # newfolder = args.output + f"embeddings{t.year}{t.month}{t.day}{t.hour}{t.minute}{t.second}"
+  # save embeddings too
+  all_embeddings = {}
+  newfolder = args.output + f"embeddings{t.year}{t.month}{t.day}{t.hour}{t.minute}{t.second}"
+  os.makedirs(newfolder)
 
 
-  # for dirname in os.listdir():
-  #   os.chdir(dirname)
-  #   os.mkdir(newfolder)
+  for infile in loader.files:
+    filename = os.path.basename(infile)
+    sr, d = wav.read(infile)
 
-  #   print(f"\nProcessing {dirname} folder")
+    print(f"Loaded file {filename} with sample rate {sr}", d.shape)
 
-  #   new_embeddings = []
-  #   audio = []
-  #   for filename in os.listdir():
-  #     sr, d = wav.read(filename)
+    # # stereo to mono
+    # if d.shape[-1] == 2:
+    #   d = d.sum(axis=1) / 2
 
-  #     print(f"Loaded file {filename} with sample rate {sr}", d.shape)
+    # # if sr != 16000:
+    # #   print(f"Resampling to 16000, new length is {round(len(d) * float(16000) / sr)}")
+    # #   d = sps.resample(d, round(len(d) * float(16000) / sr))
+    # #   sr = 16000
 
-  #     # stereo to mono
-  #     if d.shape[-1] == 2:
-  #       d = d.sum(axis=1) / 2
+    # # trim to 30s due to memory
+    # # if d.shape[0] >= 30 * sr:
+    # #   d = d[:30 * 16000]
 
-  #     # if sr != 16000:
-  #     #   print(f"Resampling to 16000, new length is {round(len(d) * float(16000) / sr)}")
-  #     #   d = sps.resample(d, round(len(d) * float(16000) / sr))
-  #     #   sr = 16000
+    # embedding = fusion_cat_xwc.get_scene_embeddings(torch.as_tensor(d, dtype=torch.float32)[None, :], model)
 
-  #     # trim to 30s due to memory
-  #     # if d.shape[0] >= 30 * sr:
-  #     #   d = d[:30 * 16000]
+    # new_embeddings.append({'filename': filename, 'embedding': embedding})
+    # torch.save(embedding, f"{newfolder}/{filename}.pt")
 
-  #     embedding = fusion_cat_xwc.get_scene_embeddings(torch.as_tensor(d, dtype=torch.float32)[None, :], model)
-
-  #     new_embeddings.append({'filename': filename, 'embedding': embedding})
-  #     torch.save(embedding, f"{newfolder}/{filename}.pt")
-
-  #   all_embeddings[dirname] = new_embeddings
-
-  #   os.chdir("..")
+    # all_embeddings[dirname] = new_embeddings
 
   return
 
