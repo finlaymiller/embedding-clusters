@@ -16,7 +16,7 @@ class DataLoader():
 
     def collect(self, count=390):
         while len(self.files) < count:
-            i = 0
+            i = 1
             for file in os.listdir(self.input):
                 filename = os.fsdecode(file)
                 if filename.endswith(".wav"):

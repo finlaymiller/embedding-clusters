@@ -20,6 +20,7 @@ def get_args(raw_args=None):
 
     parser.add_argument("-i", "--input", action="store", default="data", help="Path to audio library/libraries")
     parser.add_argument("-o", "--output", action="store", default="embeddings", help="Path to write embeddings to")
+    parser.add_argument("-s", "--save", action="store_true")
 
     args = parser.parse_args(raw_args)
     print(f"input parameters {vars(args)}")
@@ -34,11 +35,11 @@ def main(raw_args=None):
 
 
   # load data and model
-  loader.collect()
+  loader.collect(3)
   model = fusion_cat_xwc.load_model()
 
   # save embeddings too
-  # all_embeddings = {}
+  all_embeddings = {"dcase": []}
   newfolder = os.path.join(args.output, f"{t.year}{t.month}{t.day}{t.hour}{t.minute}{t.second}")
   os.makedirs(newfolder)
 
@@ -62,12 +63,15 @@ def main(raw_args=None):
     # if d.shape[0] >= 10 * sr:
     #   d = d[:10 * 16000]
 
+    # save embedding
     embedding = fusion_cat_xwc.get_scene_embeddings(torch.as_tensor(d, dtype=torch.float32)[None, :], model)
-
     # new_embeddings.append({'filename': filename, 'embedding': embedding})
-    torch.save(embedding, f"{newfolder}/{filename}.pt")
-
     # all_embeddings[dirname] = new_embeddings
+    all_embeddings["dcase"].append({'filename': filename, 'embedding': embedding})
+    if args.save:
+      torch.save(embedding, f"{newfolder}/{filename}.pt")
+
+  print(all_embeddings)
 
   return
 
