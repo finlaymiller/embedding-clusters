@@ -17,15 +17,13 @@ class DataLoader():
             print(f"Dataloader instantiated.\nInput folder is {self.input}\nOutput folder is {self.output}")
 
     def collect(self, count=390):
-        while len(self.files) < count:
-            i = 1
-            for file in os.listdir(self.input):
+            for file in os.listdir(self.input)[:count + 1]:
                 filename = os.fsdecode(file)
                 if filename.endswith(".wav"):
                     self.files.append(os.path.join(self.input, filename))
 
                     if self.verbose:
-                        print(f"{i:03}/{count} {filename} added\t{len(self.files) < count}")
+                        print(f"{i:03}/{count} {filename} added")
 
                     i += 1
 
