@@ -18,8 +18,8 @@ from sklearn.decomposition import PCA
 def get_args(raw_args=None):
     parser = argparse.ArgumentParser(description="Clustering by embedding using GURA")
 
-    parser.add_argument("-i", "--input", action="store", default="/data", help="Path to audio library/libraries")
-    parser.add_argument("-o", "--output", action="store", default="/embeddings", help="Path to write embeddings to")
+    parser.add_argument("-i", "--input", action="store", default="data", help="Path to audio library/libraries")
+    parser.add_argument("-o", "--output", action="store", default="embeddings", help="Path to write embeddings to")
 
     args = parser.parse_args(raw_args)
     print(f"input parameters {vars(args)}")
