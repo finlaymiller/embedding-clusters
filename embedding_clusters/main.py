@@ -42,7 +42,7 @@ def main(raw_args=None):
   loader = DataLoader(args)
 
   # load data and model
-  loader.collect(3)
+  loader.collect(4)
   model = fusion_cat_xwc.load_model()
 
   # save embeddings too
