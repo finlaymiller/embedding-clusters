@@ -23,6 +23,8 @@ def get_args(raw_args=None):
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable more prints")
     parser.add_argument("-i", "--input", action="store", default="data", help="Path to audio library/libraries")
     parser.add_argument("-o", "--output", action="store", default="output", help="Path to write outputs to")
+    parser.add_argument("-r", "--regen", action="store", default="output", help="Path to check for existing embeddings")
+    parser.add_argument("-n", "--num_samples", action="store", default="100", help="Number of samples to process")
 
     args = parser.parse_args(raw_args)
     print(f"input parameters {vars(args)}")
@@ -38,50 +40,62 @@ def main(raw_args=None):
     args.input = "/media/nova/Datasets/DCASE2016/dev/audio"
     args.ouput = "test"
     args.verbose = True
-    args.save = False
+    args.save = True
+    args.num_samples = 3
   loader = DataLoader(args)
 
   # load data and model
-  loader.collect(100)
+  loader.collect(args.num_samples)
   model = fusion_cat_xwc.load_model()
 
   # save embeddings too
+  # TODO: programmatically get dataset name
   all_embeddings = {"dcase": []}
-  newfolder = os.path.join(args.output, tf)
-  os.makedirs(newfolder)
 
   # generate embeddings
+  i = 1
   for infile in loader.files:
+    embedding = {}
     filename = os.path.basename(infile)
-    sr, d = wav.read(infile)
 
-    if args.verbose:
-      print(f"Loaded file {filename} with sample rate {sr} and shape {d.shape}")
+    if args.regen:
+      if os.path.exists(f"{args.output}/{filename}.pt"):
+        if args.verbose:
+          print(f"Found existing embedding for {filename}")
+        
+        embedding = torch.load(f"{args.output}/{filename}.pt")
+    else:
 
-    # stereo to mono
-    if d.shape[-1] == 2:
-      d = d.sum(axis=1) / 2
+      sr, d = wav.read(infile)
 
-    # if sr != 16000:
-    #   print(f"Resampling to 16000, new length is {round(len(d) * float(16000) / sr)}")
-    #   d = sps.resample(d, round(len(d) * float(16000) / sr))
-    #   sr = 16000
+      if args.verbose:
+        print(f"[{i}/{args.num_samples}] Processing file {filename}\twith sample rate {sr} and shape {d.shape}")
 
-    # trim to 10s due to memory
-    # if d.shape[0] >= 10 * sr:
-    #   d = d[:10 * 16000]
+      # stereo to mono
+      if d.shape[-1] == 2:
+        d = d.sum(axis=1) / 2
 
-    # save embedding
-    embedding = fusion_cat_xwc.get_scene_embeddings(torch.as_tensor(d, dtype=torch.float32)[None, :], model)
+      # if sr != 16000:
+      #   print(f"Resampling to 16000, new length is {round(len(d) * float(16000) / sr)}")
+      #   d = sps.resample(d, round(len(d) * float(16000) / sr))
+      #   sr = 16000
+
+      # trim to 10s due to memory
+      # if d.shape[0] >= 10 * sr:
+      #   d = d[:10 * 16000]
+
+      # save embedding
+      embedding = fusion_cat_xwc.get_scene_embeddings(torch.as_tensor(d, dtype=torch.float32)[None, :], model)
+
+      if args.save:
+        torch.save(embedding, f"{args.output}/{filename.split('.')[0]}.pt")
+
     # new_embeddings.append({'filename': filename, 'embedding': embedding})
     # all_embeddings[dirname] = new_embeddings
     all_embeddings["dcase"].append({'filename': filename, 'embedding': embedding})
-    if args.save:
-      torch.save(embedding, f"{newfolder}/{filename}.pt")
 
   if args.verbose:
-    print("Created embeddings:")
-    print(all_embeddings)
+    print("Finished creating embeddings")
 
   # get all embeddings as flat list
   z = np.asarray([np.asarray(item) for sublist in list(all_embeddings.values()) for item in sublist]).squeeze()
@@ -104,7 +118,6 @@ def main(raw_args=None):
   fig, ax = plt.subplots(figsize=(15,15))
 
   i = 0
-  dots = []
   for key, embeddings in all_embeddings.items():
     embedding_len = len(embeddings)
     kp = datasets.index(key) / len(datasets)
