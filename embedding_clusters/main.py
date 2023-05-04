@@ -22,7 +22,7 @@ def get_args(raw_args=None):
     parser.add_argument("-d", "--debug", action="store_true", help="Use debug settings, maximum verbosity")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable more prints")
     parser.add_argument("-i", "--input", action="store", default="data", help="Path to audio library/libraries")
-    parser.add_argument("-o", "--output", action="store", default="embeddings", help="Path to write embeddings to")
+    parser.add_argument("-o", "--output", action="store", default="output", help="Path to write outputs to")
 
     args = parser.parse_args(raw_args)
     print(f"input parameters {vars(args)}")
@@ -30,15 +30,16 @@ def get_args(raw_args=None):
 
 def main(raw_args=None):
   t = datetime.datetime.now()
+  tf = f"{t.year}{t.month}{t.day}{t.hour}{t.minute}{t.second}"
 
   # process args
   args = get_args(raw_args)
   if args.debug:
     args.input = "/media/nova/Datasets/DCASE2016/eval/audio"
+    args.ouput = "test"
     args.verbose = True
     args.save = False
   loader = DataLoader(args)
-
 
   # load data and model
   loader.collect(3)
@@ -46,7 +47,7 @@ def main(raw_args=None):
 
   # save embeddings too
   all_embeddings = {"dcase": []}
-  newfolder = os.path.join(args.output, f"{t.year}{t.month}{t.day}{t.hour}{t.minute}{t.second}")
+  newfolder = os.path.join(args.output, tf)
   os.makedirs(newfolder)
 
   # generate embeddings
@@ -81,6 +82,46 @@ def main(raw_args=None):
   if args.verbose:
     print("Created embeddings:")
     print(all_embeddings)
+
+  # get all embeddings as flat list
+  z = np.asarray([np.asarray(item) for sublist in list(all_embeddings.values()) for item in sublist]).squeeze()
+
+  # get labels as spread array
+  labels = []
+  for k, v in all_embeddings.items():
+    for e in range(len(v)):
+      labels.append(k)
+  print(labels)
+
+  # Create a two dimensional t-SNE projection of the embeddings
+  tsne = TSNE(3, verbose=1)
+  tsne_proj = tsne.fit_transform(z)
+
+  cmap = cm.get_cmap('tab20')
+
+  datasets = list(all_embeddings.keys())
+
+  fig, ax = plt.subplots(figsize=(15,15))
+
+  i = 0
+  dots = []
+  for key, embeddings in all_embeddings.items():
+    embedding_len = len(embeddings)
+    kp = datasets.index(key) / len(datasets)
+    ax.plot(tsne_proj[i:i+embedding_len, 0], tsne_proj[i:i+embedding_len, 1], color=cmap(kp), label=key)
+    i = i + embedding_len
+
+  # browser = PointBrowser()
+  # fig.canvas.mpl_connect('pick_event', browser.on_pick)
+  # fig.canvas.mpl_connect('key_press_event', browser.on_press)
+
+  plt.xticks([])
+  plt.yticks([])
+  plt.legend()
+  plt.show()
+  
+  if args.debug:
+    plt.savefig(os.path.join(args.output, "plots", f"{tf}.png"))
 
   return
 
