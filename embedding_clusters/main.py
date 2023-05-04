@@ -41,7 +41,7 @@ def main(raw_args=None):
     args.ouput = "test"
     args.verbose = True
     args.save = True
-    args.num_samples = 3
+    # args.num_samples = 3
   loader = DataLoader(args)
 
   # load data and model
