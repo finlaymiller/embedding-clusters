@@ -25,7 +25,7 @@ class DataLoader():
                     self.files.append(os.path.join(self.input, filename))
 
                     if self.verbose:
-                        print(f"{i:03}/{count} {filename} added\t{len(self.files)}")
+                        print(f"{i:03}/{count} {filename} added\t{len(self.files) < count}")
 
                     i += 1
 
