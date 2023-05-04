@@ -20,7 +20,8 @@ class DataLoader():
             for file in os.listdir(self.input):
                 filename = os.fsdecode(file)
                 if filename.endswith(".wav"):
-                    print(f"{i} {filename}")
+                    self.files.append(os.path.join(self.input, filename))
+                    print(f"{i} {filename} added")
                     i += 1
 
     def load_random(self, count=100):
