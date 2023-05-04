@@ -30,6 +30,8 @@ def main(raw_args=None):
   args = get_args(raw_args)
   loader = DataLoader(args)
 
+  loader.load()
+
   # load model
   # model = fusion_cat_xwc.load_model()
 
