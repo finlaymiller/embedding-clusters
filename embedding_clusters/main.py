@@ -24,7 +24,7 @@ def get_args(raw_args=None):
     parser.add_argument("-i", "--input", action="store", default="data", help="Path to audio library/libraries")
     parser.add_argument("-o", "--output", action="store", default="output", help="Path to write outputs to")
     parser.add_argument("-r", "--regen", action="store", default="output", help="Path to check for existing embeddings")
-    parser.add_argument("-n", "--num_samples", action="store", default=100, help="Number of samples to process")
+    parser.add_argument("-n", "--num_samples", action="store", default=100, dtype=int, help="Number of samples to process")
 
     args = parser.parse_args(raw_args)
     print(f"input parameters {vars(args)}")
@@ -61,14 +61,17 @@ def main(raw_args=None):
 
     if args.regen and os.path.exists(embedding_path):
         if args.verbose:
-          print(f"Found existing embedding for {filename}")
+          print(f"[{i}/{args.num_samples}] Found existing embedding for {filename}")
         
         embedding = torch.load(embedding_path)
     else:
       sr, d = wav.read(infile)
 
       if args.verbose:
-        print(f"[{i}/{args.num_samples}] Processing file {filename}\twith sample rate {sr} and shape {d.shape}")
+        print(f"[{i}/{args.num_samples}] Processing file {filename}")
+
+      if args.debug:
+        print("File has sample rate {sr} and shape {d.shape}")
 
       # stereo to mono
       if d.shape[-1] == 2:
@@ -91,7 +94,7 @@ def main(raw_args=None):
 
     # new_embeddings.append({'filename': filename, 'embedding': embedding})
     # all_embeddings[dirname] = new_embeddings
-    all_embeddings["dcase"].append({filename, embedding})
+    all_embeddings["dcase"].append({'filename': filename, 'embedding': embedding})
 
     i += 1
 
