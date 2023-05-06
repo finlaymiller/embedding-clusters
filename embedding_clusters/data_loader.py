@@ -17,14 +17,14 @@ class DataLoader():
         if self.verbose:
             print(f"Dataloader instantiated.\nInput folder is {self.input}\nOutput folder is {self.output}")
 
-    def collect(self, count=390):
+    def collect(self, count=10):
         for file in os.listdir(self.input)[:count]:
             filename = os.fsdecode(file)
             if filename.endswith(".wav"):
                 self.files.append(os.path.join(self.input, filename))
 
                 if self.verbose:
-                    print(f"{len(self.files):03}/{count:03} {filename} added")
+                    print('\033[K' + f"[{len(self.files):03}/{count:03}] {filename} added", end='\r')
 
     def load_random(self, count=100):
         print(f"randomly sampling {count} files")

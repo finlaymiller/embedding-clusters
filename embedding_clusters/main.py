@@ -31,11 +31,13 @@ def get_args(raw_args=None):
     return args
 
 def main(raw_args=None):
-  t = datetime.datetime.now()
-  tf = f"{t.year}{t.month}{t.day}{t.hour}{t.minute}{t.second}"
+  ts = datetime.datetime.now()
+  tf = f"{ts.year}{ts.month}{ts.day}{ts.hour}{ts.minute}{ts.second}"
 
   # process args
   args = get_args(raw_args)
+  args.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
   if args.debug:
     args.input = "/media/nova/Datasets/DCASE2016/dev/audio"
     args.ouput = "test"
@@ -53,15 +55,14 @@ def main(raw_args=None):
   all_embeddings = {"dcase": []}
 
   # generate embeddings
-  i = 1
-  for infile in loader.files:
+  for i, infile in enumerate(loader.files):
     embedding = {}
     filename = os.path.basename(infile)
     embedding_path = os.path.join(args.regen, f"{filename.split('.')[0]}.pt")
 
     if args.regen and os.path.exists(embedding_path):
         if args.verbose:
-          print(f"[{i}/{args.num_samples}] Found existing embedding for {filename}")
+          print('\033[K' + f"[{i+1}/{args.num_samples}] Found existing embedding for {filename}", end='\r')
         
         embedding = torch.load(embedding_path)
     else:
@@ -71,8 +72,9 @@ def main(raw_args=None):
         print(f"[{i}/{args.num_samples}] Processing file {filename}")
 
       if args.debug:
-        print("File has sample rate {sr} and shape {d.shape}")
+        print(f"File has sample rate {sr} and shape {d.shape}")
 
+      # TODO: Check to see whether the bottom three processing steps are still required
       # stereo to mono
       if d.shape[-1] == 2:
         d = d.sum(axis=1) / 2
@@ -81,7 +83,7 @@ def main(raw_args=None):
       #   print(f"Resampling to 16000, new length is {round(len(d) * float(16000) / sr)}")
       #   d = sps.resample(d, round(len(d) * float(16000) / sr))
       #   sr = 16000
-
+      
       # trim to 10s due to memory
       # if d.shape[0] >= 10 * sr:
       #   d = d[:10 * 16000]
@@ -96,10 +98,8 @@ def main(raw_args=None):
     # all_embeddings[dirname] = new_embeddings
     all_embeddings["dcase"].append({'filename': filename, 'embedding': embedding})
 
-    i += 1
-
-  if args.verbose:
-    print("Finished creating embeddings", all_embeddings)
+  # if args.verbose:
+  #   print("Finished creating embeddings", all_embeddings)
 
   # get all embeddings as flat list
   z = np.asarray([np.asarray(item) for sublist in list(all_embeddings.values()) for item in sublist]).squeeze()
