@@ -63,6 +63,7 @@ def main(raw_args=None):
     if args.regen and os.path.exists(embedding_path):
         if args.verbose:
           print('\033[K' + f"[{i+1}/{args.num_samples}] Found existing embedding for {filename}", end='\r')
+          print()
         
         embedding = torch.load(embedding_path)
     else:

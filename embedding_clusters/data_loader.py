@@ -25,6 +25,7 @@ class DataLoader():
 
                 if self.verbose:
                     print('\033[K' + f"[{len(self.files):03}/{count:03}] {filename} added", end='\r')
+        print()
 
     def load_random(self, count=100):
         print(f"randomly sampling {count} files")
